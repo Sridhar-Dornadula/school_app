@@ -7,6 +7,13 @@
   packages = [
     pkgs.python3
     pkgs.jdk20
+    pkgs.flutter
+    pkgs.androidsdk
+    pkgs.clang
+    pkgs.cmake
+    pkgs.ninja
+    pkgs.pkg-config
+    pkgs.google-chrome 
   ];
 
   # environment variables
