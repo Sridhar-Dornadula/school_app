@@ -1,14 +1,8 @@
 from flet import *
+import flet as ft
 import requests
 from datetime import datetime
 import calendar
-
-# Global user info variables
-p_name = ""
-school_name = ""
-class_to_student = ""
-id_dsrid = ""
-p_dsrid=""
 
 def get_month_dates():
     today = datetime.today()
@@ -137,156 +131,96 @@ def main(page: Page):
                     ]
                 )
             )
+            
+        if name.startswith("📜"):
+            page.add(
+                Column(
+                    alignment=MainAxisAlignment.CENTER,
+                    horizontal_alignment=CrossAxisAlignment.CENTER,
+                    scroll=ScrollMode.AUTO,
+                    controls=[
+                        Container(height=20),
+                        Text("📖 Daily Subjects Dairy", color="white", size=22, weight="bold"),
+                        Container(height=20),
+                        DataTable(
+                            columns=[
+                                DataColumn(label=Text("Subject Name", color="white")),
+                                DataColumn(label=Text("Status / Note", color="white")),
+                            ],
+                            rows=[
+                                DataRow(cells=[
+                                    DataCell(Text("Telugu", color="white")),
+                                    DataCell(Text("")),
+                                ]),
+                                DataRow(cells=[
+                                    DataCell(Text("Hindi", color="white")),
+                                    DataCell(Text("")),
+                                ]),
+                                DataRow(cells=[
+                                    DataCell(Text("English", color="white")),
+                                    DataCell(Text("")),
+                                ]),
+                                DataRow(cells=[
+                                    DataCell(Text("Maths", color="white")),
+                                    DataCell(Text("")),
+                                ]),
+                                DataRow(cells=[
+                                    DataCell(Text("Science", color="white")),
+                                    DataCell(Text("")),
+                                ]),
+                                DataRow(cells=[
+                                    DataCell(Text("Social", color="white")),
+                                    DataCell(Text("")),
+                                ]),
+                            ],
+                            border=BorderSide(1, "white"),
+                            heading_row_color="black",
+                            data_row_color={"even": "black", "odd": "black"},
+                        ),
+                        Container(height=30),
+                    ]
+                )
+            )
 
     def get_main_page():
-        global p_dsrid
-        categories_grid = Column(spacing=10)
+        print("Frontend: main() function loaded")
+        page.title = "School Management Dashboard"
+        page.bgcolor = "#041955"
+        page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+        page.vertical_alignment = ft.MainAxisAlignment.CENTER
 
-        # build rows with 2 categories each
-        for i in range(0, len(categories), 2):
-            row_controls = []
+        welcome_text = Text(f"Welcome {p_name}! 👋", size=28, color="white", weight="bold")
 
-            for j in range(2):
-                if i + j < len(categories):
-                    row_controls.append(
-                        Container(
-                            bgcolor=FG,
-                            height=80,
-                            width=210,
-                            border_radius=20,
-                            padding=15,
-                            content=Column(
-                                controls=[Text(categories[i + j], color="white", weight="bold")]
-                            ),
-                            on_click=lambda e, name=categories[i + j]: show_category_page(name)
-                        )
-                    )
-            categories_grid.controls.append(Row(spacing=10, controls=row_controls))
+        category_buttons = [
+            ElevatedButton(
+                text=cat,
+                width=300,
+                on_click=lambda e, name=cat: show_category_page(name),
+                bgcolor="#3450a1",
+                color="white"
+            )
+            for cat in categories
+        ]
 
-        # Fetch attendance data here
-        try:
-            attendance_response = requests.get(f"https://sd50.serveo.net/attendance/student/{p_dsrid}?start_date={start_date}&end_date={end_date}")
-            if attendance_response.status_code == 200:
-                attendance_data = attendance_response.json()
-                summary = attendance_data.get("summary", {})
-                total = summary.get("total_days", 0)
-                present = summary.get("present_days", 0)
-                absent = summary.get("absent_days", 0)
-                percentage = summary.get("percentage", "0%")
-            else:
-                total, present, absent, percentage = 0, 0, 0, "0%"
-        except:
-            total, present, absent, percentage = 0, 0, 0, "0%"
-
-        page.appbar = AppBar(
-            leading=IconButton(icon=icons.MENU, icon_color="white", on_click=open_drawer),
-            title=Text(""),
-            center_title=False,
-            bgcolor=BG,
-            actions=[
-                IconButton(icon=icons.SEARCH, icon_color="white"),
-                IconButton(
-                    icon=icons.NOTIFICATIONS_OUTLINED,
-                    icon_color="white",
-                    on_click=lambda e: show_notification("📢 Notification", "You have 3 new messages 📬")
-                ),
-            ],
-        )
-
-        page.drawer = NavigationDrawer(
-            controls=[
-                Container(height=40),
-                ListTile(
-                    leading=CircleAvatar(
-                        foreground_image_url=f"https://sd50.serveo.net/photo/{p_dsrid}",
-                        radius=20,
-                    ),
-                    title=Text(p_name, size=16, weight="bold"),
-                    subtitle=Text(f"Class={class_to_student}", color="orange"),
-                ),
-                Divider(),
-                *[
-                    ListTile(leading=Icon(icon), title=Text(title))
-                    for icon, title in [
-                        (icons.CREDIT_CARD, "Cards"),
-                        (icons.MESSAGE, "Messages"),
-                        (icons.NOTIFICATIONS, "Notification"),
-                        (icons.HISTORY, "Purchase History"),
-                        (icons.ASSIGNMENT, "Activity History"),
-                        (icons.SETTINGS, "Settings"),
-                        (icons.LOCK, "Change Password"),
-                        (icons.LANGUAGE, "Change Language"),
-                        (icons.HELP_CENTER, "Help Center"),
-                        (icons.FEEDBACK, "Feedback"),
-                        (icons.POLICY, "Privacy Policy")
-                    ]
-                ]
-            ]
-        )
-
-        return Container(
-            expand=True,
-            bgcolor=BG,
-            border_radius=30,
-            padding=padding.all(20),
-            content=Column(
-                expand=True,  
-                scroll=ScrollMode.AUTO,  
+        page.add(
+            Column(
+                alignment=MainAxisAlignment.CENTER,
+                horizontal_alignment=CrossAxisAlignment.CENTER,
+                spacing=20,
                 controls=[
-                    Row(
-                        vertical_alignment=CrossAxisAlignment.CENTER,
-                        controls=[
-                            CircleAvatar(
-                                foreground_image_url=f"https://sd50.serveo.net/photo/{p_dsrid}",
-                                radius=25,
-                            ),
-                            Container(width=10),
-                            Column(
-                                alignment=MainAxisAlignment.CENTER,
-                                spacing=2,
-                                controls=[
-                                    Text(p_name, size=16, color="white", weight="bold"),
-                                    Text(f"Class={class_to_student}", size=12, color=FWG)
-                                ]
-                            )
-                        ]
-                    ),
-                    Container(height=20),
-                    Text(f"Hi {p_name} Welcome", color="white"),
-                    # Dashboard section
-                    Container(
-                        padding=padding.symmetric(vertical=10),
-                        bgcolor=FG,
-                        border_radius=15,
-                        width=450,
-                        content=Column(
-                            horizontal_alignment=CrossAxisAlignment.START,
-                            controls=[
-                                Text("  📅--> 𝒜𝓉𝓉𝑒𝓃𝒹𝒶𝓃𝒸𝑒 𝒟𝒶𝓈𝒽𝒷𝑜𝒶𝓇𝒹", color="white", weight="bold", size=16),
-                                Row(
-                                    alignment=MainAxisAlignment.SPACE_BETWEEN,
-                                    controls=[
-                                        Column(controls=[Text("  Total Days", color=FWG), Text(f"  {total}", color="white", weight="bold")]),
-                                        Column(controls=[Text("Present", color=FWG), Text(f"{present}", color="white", weight="bold")]),
-                                        Column(controls=[Text("Absent", color=FWG), Text(f"{absent}", color="white", weight="bold")]),
-                                        Column(controls=[Text("Percentage  ", color=FWG), Text(f"{percentage}", color="white", weight="bold")]),
-                                    ]
-                                )
-                            ]
-                        )
-                    ),
-                    Text('CATEGORIES', color=FWG),
-                    Container(
-                        padding=padding.only(top=10, bottom=20),
-                        content=categories_grid
-                    )
+                    welcome_text,
+                    Container(height=30),
+                    *category_buttons
                 ]
             )
         )
 
+        page.update()
+
     def show_main_page(e=None):
-        page.clean()
-        page.add(get_main_page())
+        page.controls.clear()
+        get_main_page()
+        page.update()
 
     def show_login_page(e=None):
         email_field = TextField(label="Email", width=300)
@@ -387,6 +321,6 @@ def main(page: Page):
         page.update()
 
     show_welcome_screen()
-
-app(target=main, host="0.0.0.0", port=8550)
-
+if __name__ == "__main__":
+    #ft.app(target=main)
+    ft.app(target=main)
